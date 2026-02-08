@@ -1,0 +1,16 @@
+node_modules
+dist
+coverage
+generated
+.env
+*.db
+*.db-journal
+__pycache__
+.venv
+**/.venv
+*.pyc
+.git
+.gitignore
+README.md
+test
+**/*.spec.ts

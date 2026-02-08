@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int     @id @default(autoincrement())
+  name           String  @unique
+  email          String  @unique
+  passwordHash   String
+  profilePicture String?
+
+  followedCommunities Community[]  @relation("CommunityFollowers")
+  adminCommunities    Community[]  @relation("CommunityAdmins")
+  ownedCommunity      Community?
+  posts               Post[]
+  postRatings         PostRating[]
+  comments            Comment[]
+}
+
+model Community {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String
+  bannerImage String?
+  iconImage   String?
+  owner       User     @relation(fields: [ownerId], references: [id])
+  createdAt   DateTime @default(now())
+  followers   User[]   @relation("CommunityFollowers")
+  admins      User[]   @relation("CommunityAdmins")
+  posts       Post[]
+
+  autoPublishPosts Boolean
+
+  ownerId Int @unique
+}
+
+model Post {
+  id           Int      @id @default(autoincrement())
+  title        String
+  content      String
+  createdAt    DateTime @default(now())
+  parentNodeId String
+  author       User     @relation(fields: [authorId], references: [id])
+
+  community Community    @relation(fields: [communityId], references: [id])
+  ratings   PostRating[]
+  comments  Comment[]
+
+  isVerified Boolean
+
+  authorId    Int
+  communityId Int
+}
+
+model PostRating {
+  id     Int @id @default(autoincrement())
+  rating Int
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  userId Int
+  postId Int
+
+  @@unique([userId, postId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  userId Int
+  postId Int
+}
